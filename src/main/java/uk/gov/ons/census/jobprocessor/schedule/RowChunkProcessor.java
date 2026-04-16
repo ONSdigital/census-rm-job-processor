@@ -1,0 +1,79 @@
+package uk.gov.ons.census.jobprocessor.schedule;
+
+import com.google.cloud.spring.pubsub.core.PubSubTemplate;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.ons.census.common.model.entity.Job;
+import uk.gov.ons.census.common.model.entity.JobRow;
+import uk.gov.ons.census.common.model.entity.JobRowStatus;
+import uk.gov.ons.census.jobprocessor.jobtype.processors.JobTypeProcessor;
+import uk.gov.ons.census.jobprocessor.repository.JobRepository;
+import uk.gov.ons.census.jobprocessor.repository.JobRowRepository;
+import uk.gov.ons.census.jobprocessor.utility.JobTypeHelper;
+
+@Component
+public class RowChunkProcessor {
+  private static final Logger log = LoggerFactory.getLogger(RowChunkProcessor.class);
+  private final JobRowRepository jobRowRepository;
+  private final PubSubTemplate pubSubTemplate;
+  private final JobRepository jobRepository;
+  private final JobTypeHelper jobTypeHelper;
+
+  public RowChunkProcessor(
+      JobRowRepository jobRowRepository,
+      PubSubTemplate pubSubTemplate,
+      JobRepository jobRepository,
+      JobTypeHelper jobTypeHelper) {
+    this.jobRowRepository = jobRowRepository;
+    this.pubSubTemplate = pubSubTemplate;
+    this.jobRepository = jobRepository;
+    this.jobTypeHelper = jobTypeHelper;
+  }
+
+  @Transactional(propagation = Propagation.REQUIRES_NEW)
+  public void processChunk(Job job) {
+    JobTypeProcessor jobTypeProcessor =
+        jobTypeHelper.getJobTypeProcessor(job.getJobType(), job.getCollectionExercise());
+
+    List<JobRow> jobRows =
+        jobRowRepository.findTop500ByJobAndJobRowStatus(job, JobRowStatus.VALIDATED_OK);
+
+    for (JobRow jobRow : jobRows) {
+      try {
+        CompletableFuture<String> future =
+            pubSubTemplate.publish(
+                jobTypeProcessor.getTopic(),
+                jobTypeProcessor
+                    .getTransformer()
+                    .transformRow(
+                        job,
+                        jobRow,
+                        jobTypeProcessor.getColumnValidators(),
+                        jobTypeProcessor.getTopic()));
+
+        // Wait for up to 30 seconds to confirm that message was published
+        future.get(30, TimeUnit.SECONDS);
+
+        jobRow.setJobRowStatus(JobRowStatus.PROCESSED);
+        job.setProcessingRowNumber(job.getProcessingRowNumber() + 1);
+      } catch (Exception e) {
+        // The message sending will be retried...
+        log.atError()
+            .setMessage("Failed to send message to pubsub")
+            .setCause(e)
+            .addKeyValue("row ID", jobRow.getId())
+            .addKeyValue("job ID", job.getId())
+            .log();
+      }
+    }
+
+    jobRepository.save(job);
+    jobRowRepository.saveAll(jobRows);
+  }
+}
