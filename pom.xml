@@ -70,8 +70,8 @@
     </dependency>
     <dependency>
       <groupId>uk.gov.ons.census</groupId>
-      <artifactId>census-shared-sample-validation</artifactId>
-      <version>1.6.3-SNAPSHOT</version>
+      <artifactId>census-rm-shared-sample-validation</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
