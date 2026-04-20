@@ -7,6 +7,3 @@ spring:
       pubsub:
         emulator-host: localhost:18545
         project-id: our-project
-
-dummyuseridentity-allowed: true # This ** MUST ALWAYS!! ** be false in production!!!
-dummyuseridentity: integration-tests@testymctest.com
