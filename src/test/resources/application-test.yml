@@ -1,0 +1,9 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:16445/rm
+
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: localhost:18545
+        project-id: our-project
