@@ -42,7 +42,7 @@ public class JobTypeHelper {
 
     switch (jobType) {
       case SAMPLE:
-        return new SampleLoadTypeProcessor(newCaseTopic, pubsubProject, collectionExercise);
+        return new SampleLoadTypeProcessor(newCaseTopic, pubsubProject);
 
       case BULK_REFUSAL:
         return new BulkRefusalTypeProcessor(refusalEventTopic, pubsubProject, collectionExercise);

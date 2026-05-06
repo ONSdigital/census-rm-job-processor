@@ -56,8 +56,7 @@ class RowChunkProcessorTest {
     survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
-    JobTypeProcessor jobTypeProcessor =
-        new SampleLoadTypeProcessor("Test topic", "", collectionExercise);
+    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("Test topic", "");
     jobTypeProcessor.setTransformer(transformer);
 
     JobRow jobRow = new JobRow();
@@ -113,8 +112,7 @@ class RowChunkProcessorTest {
     survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
-    JobTypeProcessor jobTypeProcessor =
-        new SampleLoadTypeProcessor("Test topic", "", collectionExercise);
+    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("Test topic", "");
     jobTypeProcessor.setTransformer(transformer);
 
     JobRow jobRow = new JobRow();
@@ -170,8 +168,7 @@ class RowChunkProcessorTest {
     survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
-    JobTypeProcessor jobTypeProcessor =
-        new SampleLoadTypeProcessor("Test topic", "", collectionExercise);
+    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("Test topic", "");
     jobTypeProcessor.setTransformer(transformer);
 
     JobRow jobRow = new JobRow();

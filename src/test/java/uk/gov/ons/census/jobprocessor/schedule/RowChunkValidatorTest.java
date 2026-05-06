@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -57,10 +58,38 @@ class RowChunkValidatorTest {
     survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
-    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "", collectionExercise);
+    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "");
 
     JobRow jobRow = new JobRow();
-    jobRow.setRowData(Map.of("test column", "test data"));
+    Map<String, String> jobRowData = new HashMap<>();
+    jobRowData.put("UPRN", "0000");
+    jobRowData.put("ESTAB_UPRN", "0000");
+    jobRowData.put("ADDRESS_TYPE", "HH");
+    jobRowData.put("ESTAB_TYPE", "CARE HOME");
+    jobRowData.put("ADDRESS_LEVEL", "U");
+    jobRowData.put("ABP_CODE", "0000");
+    jobRowData.put("ORGANISATION_NAME", "");
+    jobRowData.put("ADDRESS_LINE1", "test ");
+    jobRowData.put("ADDRESS_LINE2", "");
+    jobRowData.put("ADDRESS_LINE3", "");
+    jobRowData.put("TOWN_NAME", "Ponty");
+    jobRowData.put("POSTCODE", "CFXX XXX");
+    jobRowData.put("LATITUDE", "0000");
+    jobRowData.put("LONGITUDE", "0000");
+    jobRowData.put("OA", "0000");
+    jobRowData.put("LSOA", "0000");
+    jobRowData.put("MSOA", "0000");
+    jobRowData.put("LAD", "0000");
+    jobRowData.put("REGION", "0000");
+    jobRowData.put("HTC_WILLINGNESS", "0");
+    jobRowData.put("HTC_DIGITAL", "0");
+    jobRowData.put("TREATMENT_CODE", "HH_LP1E");
+    jobRowData.put("FIELDCOORDINATOR_ID", "0000");
+    jobRowData.put("FIELDOFFICER_ID", "0000");
+    jobRowData.put("CE_EXPECTED_CAPACITY", "");
+    jobRowData.put("CE_SECURE", "0");
+    jobRowData.put("PRINT_BATCH", "01");
+    jobRow.setRowData(jobRowData);
     List<JobRow> jobRows = List.of(jobRow);
 
     when(jobTypeHelper.getJobTypeProcessor(job.getJobType(), collectionExercise))
@@ -106,7 +135,7 @@ class RowChunkValidatorTest {
     survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
-    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "", collectionExercise);
+    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "");
 
     JobRow jobRow = new JobRow();
     jobRow.setRowData(Map.of("test column", ""));
@@ -304,7 +333,7 @@ class RowChunkValidatorTest {
 
     ColumnValidator[] columnValidators =
         new ColumnValidator[] {
-          new ColumnValidator("newValue", true, new Rule[] {new MandatoryRule()})
+          new ColumnValidator("newValue", false, new Rule[] {new MandatoryRule()})
         };
 
     Survey survey = new Survey();
@@ -408,7 +437,7 @@ class RowChunkValidatorTest {
 
     ColumnValidator[] columnValidators =
         new ColumnValidator[] {
-          new ColumnValidator("newValue", true, new Rule[] {new MandatoryRule()})
+          new ColumnValidator("newValue", false, new Rule[] {new MandatoryRule()})
         };
 
     Survey survey = new Survey();
@@ -515,7 +544,7 @@ class RowChunkValidatorTest {
     survey.setSampleValidationRules(new ColumnValidator[] {columnValidatorMock});
     collectionExercise.setSurvey(survey);
 
-    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "", collectionExercise);
+    JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "");
 
     Map<String, String> jobRowData = Map.of("test column", "test@example.com");
 

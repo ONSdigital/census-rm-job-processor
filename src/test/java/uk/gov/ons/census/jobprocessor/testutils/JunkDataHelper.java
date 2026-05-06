@@ -1,7 +1,6 @@
 package uk.gov.ons.census.jobprocessor.testutils;
 
 import java.time.OffsetDateTime;
-import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,8 +33,25 @@ public class JunkDataHelper {
     junkCase.setInvalid(false);
     junkCase.setCollectionExercise(setupJunkCollex());
     junkCase.setCaseRef(RANDOM.nextLong());
-    junkCase.setSample(Map.of("Junk", "foo"));
-    junkCase.setSampleSensitive(Map.of("SensitiveJunk", "bar"));
+    junkCase.setAbpCode("abp");
+    junkCase.setAddressLevel("abp");
+    junkCase.setAddressLine2("abp");
+    junkCase.setAddressType("HH");
+    junkCase.setCeExpectedCapacity(0);
+    junkCase.setFieldCoordinatorId("abp");
+    junkCase.setFieldOfficerId("abp");
+    junkCase.setHtcDigital("abp");
+    junkCase.setHtcWillingness("abp");
+    junkCase.setLad("abp");
+    junkCase.setLatitude("abp");
+    junkCase.setLsoa("abp");
+    junkCase.setRegion("EN");
+    junkCase.setOa("abp");
+    junkCase.setMsoa("abp");
+    junkCase.setPostcode("CFXX XXX");
+    junkCase.setTreatmentCode("CFXX XXX");
+    junkCase.setUprn("blank");
+    junkCase.setTownName("test");
     caseRepository.save(junkCase);
 
     return junkCase;
