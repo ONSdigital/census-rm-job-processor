@@ -115,7 +115,7 @@ public class ValidatedJobProcessorIT {
       jobRowData.put("TREATMENT_CODE", "HH_LP1E");
       jobRowData.put("FIELDCOORDINATOR_ID", "0000");
       jobRowData.put("FIELDOFFICER_ID", "0000");
-      jobRowData.put("CE_EXPECTED_CAPACITY", "");
+      jobRowData.put("CE_EXPECTED_CAPACITY", "0");
       jobRowData.put("CE_SECURE", "0");
       jobRowData.put("PRINT_BATCH", "01");
       jobRow.setRowData(jobRowData);
@@ -132,13 +132,8 @@ public class ValidatedJobProcessorIT {
       assertThat(emittedEvent.getPayload().getNewCase()).isNotNull();
       assertThat(emittedEvent.getPayload().getNewCase().getCollectionExerciseId())
           .isEqualTo(collectionExercise.getId());
-      // TODO Replace these with the new sample structure
-      //      assertThat(emittedEvent.getPayload().getNewCase().getSample().get("Junk"))
-      //          .isEqualTo("test junk");
-      //
-      // assertThat(emittedEvent.getPayload().getNewCase().getSampleSensitive().get("SensitiveJunk"))
-      //          .isEqualTo("sensitive");
-
+      assertThat(emittedEvent.getPayload().getNewCase().getUprn())
+          .isEqualTo(jobRowData.get("UPRN"));
       Job processedJob = getProcessedJob(job.getId());
       assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.PROCESSED);
       assertThat(processedJob.getProcessingRowNumber()).isEqualTo(1);
