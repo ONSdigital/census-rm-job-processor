@@ -23,6 +23,7 @@ import uk.gov.ons.census.common.model.entity.JobRowStatus;
 import uk.gov.ons.census.common.model.entity.JobType;
 import uk.gov.ons.census.common.model.entity.Survey;
 import uk.gov.ons.census.common.validation.ColumnValidator;
+import uk.gov.ons.census.common.validation.ColumnValidators;
 import uk.gov.ons.census.common.validation.Rule;
 import uk.gov.ons.census.jobprocessor.jobtype.processors.JobTypeProcessor;
 import uk.gov.ons.census.jobprocessor.jobtype.processors.SampleLoadTypeProcessor;
@@ -49,15 +50,18 @@ class RowChunkProcessorTest {
     job.setCollectionExercise(collectionExercise);
 
     Transformer transformer = mock(Transformer.class);
-    ColumnValidator[] columnValidators =
-        new ColumnValidator[] {new ColumnValidator("test column", false, new Rule[0])};
+    ColumnValidator[] surveyColumnValidators =
+        new ColumnValidator[] {new ColumnValidator("test column", new Rule[0])};
+
+    ColumnValidator[] censusColumnValidators = ColumnValidators.getValidators();
 
     Survey survey = new Survey();
-    survey.setSampleValidationRules(columnValidators);
+    survey.setSampleValidationRules(surveyColumnValidators);
     collectionExercise.setSurvey(survey);
 
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("Test topic", "");
     jobTypeProcessor.setTransformer(transformer);
+    jobTypeProcessor.setColumnValidators(censusColumnValidators);
 
     JobRow jobRow = new JobRow();
     List<JobRow> jobRows = List.of(jobRow);
@@ -69,7 +73,7 @@ class RowChunkProcessorTest {
         .thenReturn(jobRows);
 
     Object messageToPublish = new Object();
-    when(transformer.transformRow(job, jobRow, columnValidators, jobTypeProcessor.getTopic()))
+    when(transformer.transformRow(job, jobRow, censusColumnValidators, jobTypeProcessor.getTopic()))
         .thenReturn(messageToPublish);
 
     CompletableFuture<String> completableFuture = mock(CompletableFuture.class);
@@ -106,7 +110,9 @@ class RowChunkProcessorTest {
 
     Transformer transformer = mock(Transformer.class);
     ColumnValidator[] columnValidators =
-        new ColumnValidator[] {new ColumnValidator("test column", false, new Rule[0])};
+        new ColumnValidator[] {new ColumnValidator("test column", new Rule[0])};
+
+    ColumnValidator[] censusColumnValidators = ColumnValidators.getValidators();
 
     Survey survey = new Survey();
     survey.setSampleValidationRules(columnValidators);
@@ -114,6 +120,7 @@ class RowChunkProcessorTest {
 
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("Test topic", "");
     jobTypeProcessor.setTransformer(transformer);
+    jobTypeProcessor.setColumnValidators(censusColumnValidators);
 
     JobRow jobRow = new JobRow();
     jobRow.setJobRowStatus(JobRowStatus.VALIDATED_OK);
@@ -126,7 +133,7 @@ class RowChunkProcessorTest {
         .thenReturn(jobRows);
 
     Object messageToPublish = new Object();
-    when(transformer.transformRow(job, jobRow, columnValidators, jobTypeProcessor.getTopic()))
+    when(transformer.transformRow(job, jobRow, censusColumnValidators, jobTypeProcessor.getTopic()))
         .thenReturn(messageToPublish);
 
     when(pubSubTemplate.publish(jobTypeProcessor.getTopic(), messageToPublish))
@@ -162,7 +169,7 @@ class RowChunkProcessorTest {
 
     Transformer transformer = mock(Transformer.class);
     ColumnValidator[] columnValidators =
-        new ColumnValidator[] {new ColumnValidator("test column", false, new Rule[0])};
+        new ColumnValidator[] {new ColumnValidator("test column", new Rule[0])};
 
     Survey survey = new Survey();
     survey.setSampleValidationRules(columnValidators);

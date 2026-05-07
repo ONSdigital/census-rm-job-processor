@@ -23,21 +23,15 @@ public class NewCaseTransformer implements Transformer {
     newCase.setCollectionExerciseId(job.getCollectionExercise().getId());
 
     Map<String, String> nonSensitiveSampleData = new HashMap<>();
-    Map<String, String> sensitiveSampleData = new HashMap<>();
 
     for (ColumnValidator columnValidator : columnValidators) {
       String columnName = columnValidator.getColumnName();
       String sampleValue = rowData.get(columnName);
 
-      if (columnValidator.isSensitive()) {
-        sensitiveSampleData.put(columnName, sampleValue);
-      } else {
-        nonSensitiveSampleData.put(columnName, sampleValue);
-      }
+      nonSensitiveSampleData.put(columnName, sampleValue);
     }
 
     newCase.setSample(nonSensitiveSampleData);
-    newCase.setSampleSensitive(sensitiveSampleData);
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setNewCase(newCase);

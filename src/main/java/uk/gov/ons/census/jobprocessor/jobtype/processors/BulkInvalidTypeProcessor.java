@@ -30,10 +30,10 @@ public class BulkInvalidTypeProcessor extends JobTypeProcessor {
   private ColumnValidator[] getBulkInvalidCaseValidationRules(
       CollectionExercise collectionExercise) {
     Rule[] caseExistsRules = {new CaseExistsInCollectionExerciseRule(collectionExercise)};
-    ColumnValidator caseExistsValidator = new ColumnValidator("caseId", false, caseExistsRules);
+    ColumnValidator caseExistsValidator = new ColumnValidator("caseId", caseExistsRules);
 
     Rule[] reasonRule = {new MandatoryRule()};
-    ColumnValidator reasonRuleValidator = new ColumnValidator("reason", false, reasonRule);
+    ColumnValidator reasonRuleValidator = new ColumnValidator("reason", reasonRule);
 
     return new ColumnValidator[] {caseExistsValidator, reasonRuleValidator};
   }

@@ -63,9 +63,8 @@ public class JunkDataHelper {
     junkSurvey.setName("Junk survey");
     junkSurvey.setSampleValidationRules(
         new ColumnValidator[] {
-          new ColumnValidator("Junk", false, new Rule[] {new MandatoryRule()}),
-          new ColumnValidator(
-              "SensitiveJunk", true, new Rule[] {new MandatoryRule(), new LengthRule(10)})
+          new ColumnValidator("Junk", new Rule[] {new MandatoryRule()}),
+          new ColumnValidator("SensitiveJunk", new Rule[] {new MandatoryRule(), new LengthRule(10)})
         });
     junkSurvey.setSampleSeparator('j');
     junkSurvey.setSampleDefinitionUrl("http://junk");

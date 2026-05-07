@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
@@ -52,7 +53,35 @@ public class StagedJobValidatorIT {
     jobRow.setId(UUID.randomUUID());
     jobRow.setJob(job);
     jobRow.setJobRowStatus(JobRowStatus.STAGED);
-    jobRow.setRowData(Map.of("Junk", "test junk", "SensitiveJunk", "upadte"));
+    Map<String, String> jobRowData = new HashMap<>();
+    jobRowData.put("UPRN", "0000");
+    jobRowData.put("ESTAB_UPRN", "0000");
+    jobRowData.put("ADDRESS_TYPE", "HH");
+    jobRowData.put("ESTAB_TYPE", "CARE HOME");
+    jobRowData.put("ADDRESS_LEVEL", "U");
+    jobRowData.put("ABP_CODE", "0000");
+    jobRowData.put("ORGANISATION_NAME", "");
+    jobRowData.put("ADDRESS_LINE1", "test ");
+    jobRowData.put("ADDRESS_LINE2", "");
+    jobRowData.put("ADDRESS_LINE3", "");
+    jobRowData.put("TOWN_NAME", "Ponty");
+    jobRowData.put("POSTCODE", "CFXX XXX");
+    jobRowData.put("LATITUDE", "0000");
+    jobRowData.put("LONGITUDE", "0000");
+    jobRowData.put("OA", "0000");
+    jobRowData.put("LSOA", "0000");
+    jobRowData.put("MSOA", "0000");
+    jobRowData.put("LAD", "0000");
+    jobRowData.put("REGION", "0000");
+    jobRowData.put("HTC_WILLINGNESS", "0");
+    jobRowData.put("HTC_DIGITAL", "0");
+    jobRowData.put("TREATMENT_CODE", "HH_LP1E");
+    jobRowData.put("FIELDCOORDINATOR_ID", "0000");
+    jobRowData.put("FIELDOFFICER_ID", "0000");
+    jobRowData.put("CE_EXPECTED_CAPACITY", "");
+    jobRowData.put("CE_SECURE", "0");
+    jobRowData.put("PRINT_BATCH", "01");
+    jobRow.setRowData(jobRowData);
     jobRow.setOriginalRowData(new String[] {"foo", "bar"});
     jobRowRepository.saveAndFlush(jobRow);
 
@@ -105,7 +134,35 @@ public class StagedJobValidatorIT {
     jobRow.setId(UUID.randomUUID());
     jobRow.setJob(job);
     jobRow.setJobRowStatus(JobRowStatus.STAGED);
-    jobRow.setRowData(Map.of("Junk", "", "SensitiveJunk", "update"));
+    Map<String, String> jobRowData = new HashMap<>();
+    jobRowData.put("UPRN", "");
+    jobRowData.put("ESTAB_UPRN", "0000");
+    jobRowData.put("ADDRESS_TYPE", "HH");
+    jobRowData.put("ESTAB_TYPE", "CARE HOME");
+    jobRowData.put("ADDRESS_LEVEL", "U");
+    jobRowData.put("ABP_CODE", "0000");
+    jobRowData.put("ORGANISATION_NAME", "");
+    jobRowData.put("ADDRESS_LINE1", "test ");
+    jobRowData.put("ADDRESS_LINE2", "");
+    jobRowData.put("ADDRESS_LINE3", "");
+    jobRowData.put("TOWN_NAME", "Ponty");
+    jobRowData.put("POSTCODE", "CFXX XXX");
+    jobRowData.put("LATITUDE", "0000");
+    jobRowData.put("LONGITUDE", "0000");
+    jobRowData.put("OA", "0000");
+    jobRowData.put("LSOA", "0000");
+    jobRowData.put("MSOA", "0000");
+    jobRowData.put("LAD", "0000");
+    jobRowData.put("REGION", "0000");
+    jobRowData.put("HTC_WILLINGNESS", "0");
+    jobRowData.put("HTC_DIGITAL", "0");
+    jobRowData.put("TREATMENT_CODE", "HH_LP1E");
+    jobRowData.put("FIELDCOORDINATOR_ID", "0000");
+    jobRowData.put("FIELDOFFICER_ID", "0000");
+    jobRowData.put("CE_EXPECTED_CAPACITY", "");
+    jobRowData.put("CE_SECURE", "0");
+    jobRowData.put("PRINT_BATCH", "01");
+    jobRow.setRowData(jobRowData);
     jobRow.setOriginalRowData(new String[] {"foo", "bar"});
     jobRowRepository.saveAndFlush(jobRow);
 
@@ -138,301 +195,7 @@ public class StagedJobValidatorIT {
     JobRow processedJobRow = jobRowRepository.findById(jobRow.getId()).get();
     assertThat(processedJobRow.getJobRowStatus()).isEqualTo(JobRowStatus.VALIDATED_ERROR);
     assertThat(processedJobRow.getValidationErrorDescriptions())
-        .isEqualTo("Column 'Junk' value '' validation error: Mandatory value missing");
-  }
-
-  @Test
-  void processStagedJobsBulkUpdateSample() {
-    Case caze = junkDataHelper.setupJunkCase();
-    CollectionExercise collectionExercise = caze.getCollectionExercise();
-
-    Job job = new Job();
-    job.setId(UUID.randomUUID());
-    job.setCollectionExercise(collectionExercise);
-    job.setJobStatus(JobStatus.STAGING_IN_PROGRESS);
-    job.setJobType(JobType.BULK_UPDATE_SAMPLE);
-    job.setCreatedBy("norman");
-    job.setCreatedAt(OffsetDateTime.now());
-    job.setFileId(UUID.randomUUID());
-    job.setFileName("normansfile.csv");
-    job = jobRepository.saveAndFlush(job);
-
-    JobRow jobRow = new JobRow();
-    jobRow.setId(UUID.randomUUID());
-    jobRow.setJob(job);
-    jobRow.setJobRowStatus(JobRowStatus.STAGED);
-    jobRow.setRowData(
-        Map.of(
-            "caseId", caze.getId().toString(), "fieldToUpdate", "Junk", "newValue", "test update"));
-    jobRow.setOriginalRowData(new String[] {"foo", "bar"});
-    jobRowRepository.saveAndFlush(jobRow);
-
-    // This will unleash the hounds
-    job.setJobStatus(JobStatus.VALIDATION_IN_PROGRESS);
-    jobRepository.saveAndFlush(job);
-
-    // Now check that the job processed OK
-    LocalTime testTimeout = LocalTime.now().plusSeconds(60);
-
-    Job processedJob = null;
-
-    do {
-      if (processedJob != null) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          // Ignored
-        }
-      }
-
-      processedJob = jobRepository.findById(job.getId()).get();
-    } while (processedJob.getJobStatus() == JobStatus.VALIDATION_IN_PROGRESS
-        && LocalTime.now().isBefore(testTimeout));
-
-    assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.VALIDATED_OK);
-    assertThat(processedJob.getValidatingRowNumber()).isEqualTo(1);
-    assertThat(processedJob.getErrorRowCount()).isEqualTo(0);
-
-    JobRow processedJobRow = jobRowRepository.findById(jobRow.getId()).get();
-    assertThat(processedJobRow.getJobRowStatus()).isEqualTo(JobRowStatus.VALIDATED_OK);
-  }
-
-  @Test
-  void processStagedJobsBulkUpdateSampleFailsValidation() {
-    Case caze = junkDataHelper.setupJunkCase();
-    CollectionExercise collectionExercise = caze.getCollectionExercise();
-
-    Job job = new Job();
-    job.setId(UUID.randomUUID());
-    job.setCollectionExercise(collectionExercise);
-    job.setJobStatus(JobStatus.STAGING_IN_PROGRESS);
-    job.setJobType(JobType.BULK_UPDATE_SAMPLE);
-    job.setCreatedBy("norman");
-    job.setCreatedAt(OffsetDateTime.now());
-    job.setFileId(UUID.randomUUID());
-    job.setFileName("normansfile.csv");
-    job = jobRepository.saveAndFlush(job);
-
-    JobRow jobRow = new JobRow();
-    jobRow.setId(UUID.randomUUID());
-    jobRow.setJob(job);
-    jobRow.setJobRowStatus(JobRowStatus.STAGED);
-    jobRow.setRowData(
-        Map.of("caseId", caze.getId().toString(), "fieldToUpdate", "Junk", "newValue", ""));
-    jobRow.setOriginalRowData(new String[] {"foo", "bar"});
-    jobRowRepository.saveAndFlush(jobRow);
-
-    // This will unleash the hounds
-    job.setJobStatus(JobStatus.VALIDATION_IN_PROGRESS);
-    jobRepository.saveAndFlush(job);
-
-    // Now check that the job processed OK
-    LocalTime testTimeout = LocalTime.now().plusSeconds(60);
-
-    Job processedJob = null;
-
-    do {
-      if (processedJob != null) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          // Ignored
-        }
-      }
-
-      processedJob = jobRepository.findById(job.getId()).get();
-    } while (processedJob.getJobStatus() == JobStatus.VALIDATION_IN_PROGRESS
-        && LocalTime.now().isBefore(testTimeout));
-
-    assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.VALIDATED_WITH_ERRORS);
-    assertThat(processedJob.getValidatingRowNumber()).isEqualTo(1);
-    assertThat(processedJob.getErrorRowCount()).isEqualTo(1);
-
-    JobRow processedJobRow = jobRowRepository.findById(jobRow.getId()).get();
-    assertThat(processedJobRow.getJobRowStatus()).isEqualTo(JobRowStatus.VALIDATED_ERROR);
-    assertThat(processedJobRow.getValidationErrorDescriptions())
-        .isEqualTo("Column 'newValue' value '' validation error: Mandatory value missing");
-  }
-
-  @Test
-  void processStagedJobsBulkUpdateSampleSensitive() {
-    Case caze = junkDataHelper.setupJunkCase();
-    CollectionExercise collectionExercise = caze.getCollectionExercise();
-
-    Job job = new Job();
-    job.setId(UUID.randomUUID());
-    job.setCollectionExercise(collectionExercise);
-    job.setJobStatus(JobStatus.STAGING_IN_PROGRESS);
-    job.setJobType(JobType.BULK_UPDATE_SAMPLE_SENSITIVE);
-    job.setCreatedBy("norman");
-    job.setCreatedAt(OffsetDateTime.now());
-    job.setFileId(UUID.randomUUID());
-    job.setFileName("normansfile.csv");
-    job = jobRepository.saveAndFlush(job);
-
-    JobRow jobRow = new JobRow();
-    jobRow.setId(UUID.randomUUID());
-    jobRow.setJob(job);
-    jobRow.setJobRowStatus(JobRowStatus.STAGED);
-    jobRow.setRowData(
-        Map.of(
-            "caseId",
-            caze.getId().toString(),
-            "fieldToUpdate",
-            "SensitiveJunk",
-            "newValue",
-            "update"));
-    jobRow.setOriginalRowData(new String[] {"foo", "bar"});
-    jobRowRepository.saveAndFlush(jobRow);
-
-    // This will unleash the hounds
-    job.setJobStatus(JobStatus.VALIDATION_IN_PROGRESS);
-    jobRepository.saveAndFlush(job);
-
-    // Now check that the job processed OK
-    LocalTime testTimeout = LocalTime.now().plusSeconds(60);
-
-    Job processedJob = null;
-
-    do {
-      if (processedJob != null) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          // Ignored
-        }
-      }
-
-      processedJob = jobRepository.findById(job.getId()).get();
-    } while (processedJob.getJobStatus() == JobStatus.VALIDATION_IN_PROGRESS
-        && LocalTime.now().isBefore(testTimeout));
-
-    assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.VALIDATED_OK);
-    assertThat(processedJob.getValidatingRowNumber()).isEqualTo(1);
-    assertThat(processedJob.getErrorRowCount()).isEqualTo(0);
-
-    JobRow processedJobRow = jobRowRepository.findById(jobRow.getId()).get();
-    assertThat(processedJobRow.getJobRowStatus()).isEqualTo(JobRowStatus.VALIDATED_OK);
-  }
-
-  @Test
-  void processStagedJobsBulkUpdateSampleSensitiveBlankingAllowed() {
-    Case caze = junkDataHelper.setupJunkCase();
-    CollectionExercise collectionExercise = caze.getCollectionExercise();
-
-    Job job = new Job();
-    job.setId(UUID.randomUUID());
-    job.setCollectionExercise(collectionExercise);
-    job.setJobStatus(JobStatus.STAGING_IN_PROGRESS);
-    job.setJobType(JobType.BULK_UPDATE_SAMPLE_SENSITIVE);
-    job.setCreatedBy("norman");
-    job.setCreatedAt(OffsetDateTime.now());
-    job.setFileId(UUID.randomUUID());
-    job.setFileName("normansfile.csv");
-    job = jobRepository.saveAndFlush(job);
-
-    JobRow jobRow = new JobRow();
-    jobRow.setId(UUID.randomUUID());
-    jobRow.setJob(job);
-    jobRow.setJobRowStatus(JobRowStatus.STAGED);
-    jobRow.setRowData(
-        Map.of(
-            "caseId", caze.getId().toString(), "fieldToUpdate", "SensitiveJunk", "newValue", ""));
-    jobRow.setOriginalRowData(new String[] {"foo", "bar"});
-    jobRowRepository.saveAndFlush(jobRow);
-
-    // This will unleash the hounds
-    job.setJobStatus(JobStatus.VALIDATION_IN_PROGRESS);
-    jobRepository.saveAndFlush(job);
-
-    // Now check that the job processed OK
-    LocalTime testTimeout = LocalTime.now().plusSeconds(60);
-
-    Job processedJob = null;
-
-    do {
-      if (processedJob != null) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          // Ignored
-        }
-      }
-
-      processedJob = jobRepository.findById(job.getId()).get();
-    } while (processedJob.getJobStatus() == JobStatus.VALIDATION_IN_PROGRESS
-        && LocalTime.now().isBefore(testTimeout));
-
-    assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.VALIDATED_OK);
-    assertThat(processedJob.getValidatingRowNumber()).isEqualTo(1);
-    assertThat(processedJob.getErrorRowCount()).isEqualTo(0);
-
-    JobRow processedJobRow = jobRowRepository.findById(jobRow.getId()).get();
-    assertThat(processedJobRow.getJobRowStatus()).isEqualTo(JobRowStatus.VALIDATED_OK);
-  }
-
-  @Test
-  void processStagedJobsBulkUpdateSampleSensitiveFailsValidation() {
-    Case caze = junkDataHelper.setupJunkCase();
-    CollectionExercise collectionExercise = caze.getCollectionExercise();
-
-    Job job = new Job();
-    job.setId(UUID.randomUUID());
-    job.setCollectionExercise(collectionExercise);
-    job.setJobStatus(JobStatus.STAGING_IN_PROGRESS);
-    job.setJobType(JobType.BULK_UPDATE_SAMPLE_SENSITIVE);
-    job.setCreatedBy("norman");
-    job.setCreatedAt(OffsetDateTime.now());
-    job.setFileId(UUID.randomUUID());
-    job.setFileName("normansfile.csv");
-    job = jobRepository.saveAndFlush(job);
-
-    JobRow jobRow = new JobRow();
-    jobRow.setId(UUID.randomUUID());
-    jobRow.setJob(job);
-    jobRow.setJobRowStatus(JobRowStatus.STAGED);
-    jobRow.setRowData(
-        Map.of(
-            "caseId",
-            caze.getId().toString(),
-            "fieldToUpdate",
-            "SensitiveJunk",
-            "newValue",
-            "1234567890123"));
-    jobRow.setOriginalRowData(new String[] {"foo", "bar"});
-    jobRowRepository.saveAndFlush(jobRow);
-
-    // This will unleash the hounds
-    job.setJobStatus(JobStatus.VALIDATION_IN_PROGRESS);
-    jobRepository.saveAndFlush(job);
-
-    // Now check that the job processed OK
-    LocalTime testTimeout = LocalTime.now().plusSeconds(60);
-
-    Job processedJob = null;
-
-    do {
-      if (processedJob != null) {
-        try {
-          Thread.sleep(1000);
-        } catch (InterruptedException e) {
-          // Ignored
-        }
-      }
-
-      processedJob = jobRepository.findById(job.getId()).get();
-    } while (processedJob.getJobStatus() == JobStatus.VALIDATION_IN_PROGRESS
-        && LocalTime.now().isBefore(testTimeout));
-
-    assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.VALIDATED_WITH_ERRORS);
-    assertThat(processedJob.getValidatingRowNumber()).isEqualTo(1);
-    assertThat(processedJob.getErrorRowCount()).isEqualTo(1);
-
-    JobRow processedJobRow = jobRowRepository.findById(jobRow.getId()).get();
-    assertThat(processedJobRow.getJobRowStatus()).isEqualTo(JobRowStatus.VALIDATED_ERROR);
-    assertThat(processedJobRow.getValidationErrorDescriptions())
-        .isEqualTo(
-            "Column 'newValue' value '1234567890123' validation error: Exceeded max length of 10");
+        .isEqualTo("Column 'UPRN' value '' validation error: Mandatory value missing");
   }
 
   @Test

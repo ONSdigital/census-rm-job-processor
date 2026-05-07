@@ -9,7 +9,5 @@ import lombok.Data;
 public class PayloadDTO {
   private RefusalDTO refusal;
   private InvalidCaseDTO invalidCase;
-  private UpdateSample updateSample;
-  private UpdateSampleSensitive updateSampleSensitive;
   private NewCase newCase;
 }
