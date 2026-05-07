@@ -25,12 +25,6 @@ public class JobTypeHelper {
   @Value("${queueconfig.invalid-case-event-topic}")
   private String invalidCaseTopic;
 
-  @Value("${queueconfig.update-sample-topic}")
-  private String updateSampleTopic;
-
-  @Value("${queueconfig.update-sample-sensitive-topic}")
-  private String updateSensitiveSampleTopic;
-
   public JobTypeProcessor getJobTypeProcessor(
       JobType jobType, CollectionExercise collectionExercise) {
 

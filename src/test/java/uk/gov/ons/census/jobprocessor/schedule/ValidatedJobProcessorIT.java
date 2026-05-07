@@ -1,10 +1,10 @@
 package uk.gov.ons.census.jobprocessor.schedule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.jobprocessor.testutils.JunkDataHelper.getJobRowData;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -40,9 +40,6 @@ public class ValidatedJobProcessorIT {
   private static final String NEW_CASE_SUBSCRIPTION = "event_new-case_rm-case-processor";
   private static final String REFUSAL_SUBSCRIPTION = "event_refusal_rm-case-processor";
   private static final String INVALID_SUBSCRIPTION = "event_invalid-case_rm-case-processor";
-  private static final String UPDATE_SAMPLE_SUBSCRIPTION = "event_update-sample_rm-case-processor";
-  private static final String UPDATE_SAMPLE_SENSITIVE_SUBSCRIPTION =
-      "event_update-sample-sensitive_rm-case-processor";
 
   @Autowired private JobRepository jobRepository;
 
@@ -60,12 +57,6 @@ public class ValidatedJobProcessorIT {
 
   @Value("${queueconfig.invalid-case-event-topic}")
   private String invalidCaseEventTopic;
-
-  @Value("${queueconfig.update-sample-topic}")
-  private String updateSampleTopic;
-
-  @Value("${queueconfig.update-sample-sensitive-topic}")
-  private String updateSampleSensitiveTopic;
 
   @Test
   void processStagedJobsSample() throws InterruptedException {
@@ -90,34 +81,7 @@ public class ValidatedJobProcessorIT {
       jobRow.setId(UUID.randomUUID());
       jobRow.setJob(job);
       jobRow.setJobRowStatus(JobRowStatus.VALIDATED_OK);
-      Map<String, String> jobRowData = new HashMap<>();
-      jobRowData.put("UPRN", "0000");
-      jobRowData.put("ESTAB_UPRN", "0000");
-      jobRowData.put("ADDRESS_TYPE", "HH");
-      jobRowData.put("ESTAB_TYPE", "CARE HOME");
-      jobRowData.put("ADDRESS_LEVEL", "U");
-      jobRowData.put("ABP_CODE", "0000");
-      jobRowData.put("ORGANISATION_NAME", "");
-      jobRowData.put("ADDRESS_LINE1", "test ");
-      jobRowData.put("ADDRESS_LINE2", "");
-      jobRowData.put("ADDRESS_LINE3", "");
-      jobRowData.put("TOWN_NAME", "Ponty");
-      jobRowData.put("POSTCODE", "CFXX XXX");
-      jobRowData.put("LATITUDE", "0000");
-      jobRowData.put("LONGITUDE", "0000");
-      jobRowData.put("OA", "0000");
-      jobRowData.put("LSOA", "0000");
-      jobRowData.put("MSOA", "0000");
-      jobRowData.put("LAD", "0000");
-      jobRowData.put("REGION", "0000");
-      jobRowData.put("HTC_WILLINGNESS", "0");
-      jobRowData.put("HTC_DIGITAL", "0");
-      jobRowData.put("TREATMENT_CODE", "HH_LP1E");
-      jobRowData.put("FIELDCOORDINATOR_ID", "0000");
-      jobRowData.put("FIELDOFFICER_ID", "0000");
-      jobRowData.put("CE_EXPECTED_CAPACITY", "0");
-      jobRowData.put("CE_SECURE", "0");
-      jobRowData.put("PRINT_BATCH", "01");
+      Map<String, String> jobRowData = getJobRowData();
       jobRow.setRowData(jobRowData);
       jobRow.setOriginalRowData(new String[] {"foo", "bar"});
       jobRowRepository.saveAndFlush(jobRow);

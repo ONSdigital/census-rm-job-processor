@@ -4,11 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.ons.census.jobprocessor.testutils.JunkDataHelper.getJobRowData;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -59,7 +58,7 @@ class RowChunkValidatorTest {
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "");
 
     JobRow jobRow = new JobRow();
-    Map<String, String> jobRowData = getCensusData();
+    Map<String, String> jobRowData = getJobRowData();
     jobRow.setRowData(jobRowData);
     List<JobRow> jobRows = List.of(jobRow);
 
@@ -89,38 +88,6 @@ class RowChunkValidatorTest {
     assertThat(actualJob.getErrorRowCount()).isEqualTo(0);
   }
 
-  private static @NonNull Map<String, String> getCensusData() {
-    Map<String, String> jobRowData = new HashMap<>();
-    jobRowData.put("UPRN", "0000");
-    jobRowData.put("ESTAB_UPRN", "0000");
-    jobRowData.put("ADDRESS_TYPE", "HH");
-    jobRowData.put("ESTAB_TYPE", "CARE HOME");
-    jobRowData.put("ADDRESS_LEVEL", "U");
-    jobRowData.put("ABP_CODE", "0000");
-    jobRowData.put("ORGANISATION_NAME", "");
-    jobRowData.put("ADDRESS_LINE1", "test ");
-    jobRowData.put("ADDRESS_LINE2", "");
-    jobRowData.put("ADDRESS_LINE3", "");
-    jobRowData.put("TOWN_NAME", "Ponty");
-    jobRowData.put("POSTCODE", "CFXX XXX");
-    jobRowData.put("LATITUDE", "0000");
-    jobRowData.put("LONGITUDE", "0000");
-    jobRowData.put("OA", "0000");
-    jobRowData.put("LSOA", "0000");
-    jobRowData.put("MSOA", "0000");
-    jobRowData.put("LAD", "0000");
-    jobRowData.put("REGION", "0000");
-    jobRowData.put("HTC_WILLINGNESS", "0");
-    jobRowData.put("HTC_DIGITAL", "0");
-    jobRowData.put("TREATMENT_CODE", "HH_LP1E");
-    jobRowData.put("FIELDCOORDINATOR_ID", "0000");
-    jobRowData.put("FIELDOFFICER_ID", "0000");
-    jobRowData.put("CE_EXPECTED_CAPACITY", "");
-    jobRowData.put("CE_SECURE", "0");
-    jobRowData.put("PRINT_BATCH", "01");
-    return jobRowData;
-  }
-
   @Test
   void processChunkFailsValidation() {
     // Given
@@ -141,34 +108,8 @@ class RowChunkValidatorTest {
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "");
 
     JobRow jobRow = new JobRow();
-    Map<String, String> jobRowData = new HashMap<>();
+    Map<String, String> jobRowData = getJobRowData();
     jobRowData.put("UPRN", "");
-    jobRowData.put("ESTAB_UPRN", "0000");
-    jobRowData.put("ADDRESS_TYPE", "HH");
-    jobRowData.put("ESTAB_TYPE", "CARE HOME");
-    jobRowData.put("ADDRESS_LEVEL", "U");
-    jobRowData.put("ABP_CODE", "0000");
-    jobRowData.put("ORGANISATION_NAME", "");
-    jobRowData.put("ADDRESS_LINE1", "test ");
-    jobRowData.put("ADDRESS_LINE2", "");
-    jobRowData.put("ADDRESS_LINE3", "");
-    jobRowData.put("TOWN_NAME", "Ponty");
-    jobRowData.put("POSTCODE", "CFXX XXX");
-    jobRowData.put("LATITUDE", "0000");
-    jobRowData.put("LONGITUDE", "0000");
-    jobRowData.put("OA", "0000");
-    jobRowData.put("LSOA", "0000");
-    jobRowData.put("MSOA", "0000");
-    jobRowData.put("LAD", "0000");
-    jobRowData.put("REGION", "0000");
-    jobRowData.put("HTC_WILLINGNESS", "0");
-    jobRowData.put("HTC_DIGITAL", "0");
-    jobRowData.put("TREATMENT_CODE", "HH_LP1E");
-    jobRowData.put("FIELDCOORDINATOR_ID", "0000");
-    jobRowData.put("FIELDOFFICER_ID", "0000");
-    jobRowData.put("CE_EXPECTED_CAPACITY", "");
-    jobRowData.put("CE_SECURE", "0");
-    jobRowData.put("PRINT_BATCH", "01");
     jobRow.setRowData(jobRowData);
     List<JobRow> jobRows = List.of(jobRow);
 
