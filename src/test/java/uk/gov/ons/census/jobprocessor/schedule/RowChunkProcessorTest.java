@@ -50,13 +50,10 @@ class RowChunkProcessorTest {
     job.setCollectionExercise(collectionExercise);
 
     Transformer transformer = mock(Transformer.class);
-    ColumnValidator[] surveyColumnValidators =
-        new ColumnValidator[] {new ColumnValidator("test column", new Rule[0])};
 
     ColumnValidator[] censusColumnValidators = ColumnValidators.getValidators();
 
     Survey survey = new Survey();
-    survey.setSampleValidationRules(surveyColumnValidators);
     collectionExercise.setSurvey(survey);
 
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("Test topic", "");
@@ -109,13 +106,10 @@ class RowChunkProcessorTest {
     job.setCollectionExercise(collectionExercise);
 
     Transformer transformer = mock(Transformer.class);
-    ColumnValidator[] columnValidators =
-        new ColumnValidator[] {new ColumnValidator("test column", new Rule[0])};
 
     ColumnValidator[] censusColumnValidators = ColumnValidators.getValidators();
 
     Survey survey = new Survey();
-    survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("Test topic", "");
@@ -172,7 +166,6 @@ class RowChunkProcessorTest {
         new ColumnValidator[] {new ColumnValidator("test column", new Rule[0])};
 
     Survey survey = new Survey();
-    survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("Test topic", "");

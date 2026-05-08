@@ -52,7 +52,6 @@ class RowChunkValidatorTest {
         };
 
     Survey survey = new Survey();
-    survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "");
@@ -96,13 +95,7 @@ class RowChunkValidatorTest {
     job.setJobType(JobType.SAMPLE);
     job.setCollectionExercise(collectionExercise);
 
-    ColumnValidator[] columnValidators =
-        new ColumnValidator[] {
-          new ColumnValidator("test column", new Rule[] {new MandatoryRule()})
-        };
-
     Survey survey = new Survey();
-    survey.setSampleValidationRules(columnValidators);
     collectionExercise.setSurvey(survey);
 
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "");
@@ -151,7 +144,6 @@ class RowChunkValidatorTest {
     ColumnValidator columnValidatorMock = Mockito.mock(ColumnValidator.class);
 
     Survey survey = new Survey();
-    survey.setSampleValidationRules(new ColumnValidator[] {columnValidatorMock});
     collectionExercise.setSurvey(survey);
 
     JobTypeProcessor jobTypeProcessor = new SampleLoadTypeProcessor("", "");

@@ -11,12 +11,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.ons.census.common.model.entity.Case;
 import uk.gov.ons.census.common.model.entity.CollectionExercise;
-import uk.gov.ons.census.common.model.entity.CollectionInstrumentSelectionRule;
 import uk.gov.ons.census.common.model.entity.Survey;
-import uk.gov.ons.census.common.validation.ColumnValidator;
-import uk.gov.ons.census.common.validation.LengthRule;
-import uk.gov.ons.census.common.validation.MandatoryRule;
-import uk.gov.ons.census.common.validation.Rule;
 import uk.gov.ons.census.jobprocessor.repository.CaseRepository;
 import uk.gov.ons.census.jobprocessor.repository.CollectionExerciseRepository;
 import uk.gov.ons.census.jobprocessor.repository.SurveyRepository;
@@ -63,11 +58,6 @@ public class JunkDataHelper {
     Survey junkSurvey = new Survey();
     junkSurvey.setId(UUID.randomUUID());
     junkSurvey.setName("Junk survey");
-    junkSurvey.setSampleValidationRules(
-        new ColumnValidator[] {
-          new ColumnValidator("Junk", new Rule[] {new MandatoryRule()}),
-          new ColumnValidator("SensitiveJunk", new Rule[] {new MandatoryRule(), new LengthRule(10)})
-        });
     junkSurvey.setSampleSeparator('j');
     junkSurvey.setSampleDefinitionUrl("http://junk");
     surveyRepository.saveAndFlush(junkSurvey);
@@ -80,10 +70,7 @@ public class JunkDataHelper {
     junkCollectionExercise.setStartDate(OffsetDateTime.now());
     junkCollectionExercise.setEndDate(OffsetDateTime.now().plusDays(2));
     junkCollectionExercise.setMetadata(null);
-    junkCollectionExercise.setCollectionInstrumentSelectionRules(
-        new CollectionInstrumentSelectionRule[] {
-          new CollectionInstrumentSelectionRule(0, null, "junkCollectionInstrumentUrl", null)
-        });
+
     collectionExerciseRepository.saveAndFlush(junkCollectionExercise);
 
     return junkCollectionExercise;
