@@ -23,8 +23,8 @@ import uk.gov.ons.census.common.model.entity.JobRowStatus;
 import uk.gov.ons.census.common.model.entity.JobType;
 import uk.gov.ons.census.common.model.entity.Survey;
 import uk.gov.ons.census.common.validation.ColumnValidator;
-import uk.gov.ons.census.common.validation.ColumnValidators;
 import uk.gov.ons.census.common.validation.Rule;
+import uk.gov.ons.census.common.validation.SampleFieldValidators;
 import uk.gov.ons.census.jobprocessor.jobtype.processors.JobTypeProcessor;
 import uk.gov.ons.census.jobprocessor.jobtype.processors.SampleLoadTypeProcessor;
 import uk.gov.ons.census.jobprocessor.repository.JobRepository;
@@ -51,7 +51,7 @@ class RowChunkProcessorTest {
 
     Transformer transformer = mock(Transformer.class);
 
-    ColumnValidator[] censusColumnValidators = ColumnValidators.getValidators();
+    ColumnValidator[] censusColumnValidators = SampleFieldValidators.getValidators();
 
     Survey survey = new Survey();
     collectionExercise.setSurvey(survey);
@@ -107,7 +107,7 @@ class RowChunkProcessorTest {
 
     Transformer transformer = mock(Transformer.class);
 
-    ColumnValidator[] censusColumnValidators = ColumnValidators.getValidators();
+    ColumnValidator[] censusColumnValidators = SampleFieldValidators.getValidators();
 
     Survey survey = new Survey();
     collectionExercise.setSurvey(survey);

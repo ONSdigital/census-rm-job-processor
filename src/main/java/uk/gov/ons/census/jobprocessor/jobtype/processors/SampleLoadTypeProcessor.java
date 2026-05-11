@@ -6,7 +6,7 @@ import uk.gov.ons.census.common.model.entity.JobRow;
 import uk.gov.ons.census.common.model.entity.JobType;
 import uk.gov.ons.census.common.model.entity.UserGroupAuthorisedActivityType;
 import uk.gov.ons.census.common.validation.ColumnValidator;
-import uk.gov.ons.census.common.validation.ColumnValidators;
+import uk.gov.ons.census.common.validation.SampleFieldValidators;
 import uk.gov.ons.census.jobprocessor.exceptions.ValidatorFieldNotFoundException;
 import uk.gov.ons.census.jobprocessor.transformer.NewCaseTransformer;
 import uk.gov.ons.census.jobprocessor.transformer.Transformer;
@@ -17,7 +17,7 @@ public class SampleLoadTypeProcessor extends JobTypeProcessor {
   public SampleLoadTypeProcessor(String topic, String pubsubProject) {
     setJobType(JobType.SAMPLE);
     setTransformer(SAMPLE_LOAD_TRANSFORMER);
-    setColumnValidators(ColumnValidators.getValidators());
+    setColumnValidators(SampleFieldValidators.getValidators());
     setTopic(toProjectTopicName(topic, pubsubProject).toString());
     setFileLoadPermission(UserGroupAuthorisedActivityType.LOAD_SAMPLE);
     setFileViewProgressPermission(UserGroupAuthorisedActivityType.VIEW_SAMPLE_LOAD_PROGRESS);
