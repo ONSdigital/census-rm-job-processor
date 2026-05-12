@@ -59,7 +59,6 @@ public class JunkDataHelper {
     junkSurvey.setId(UUID.randomUUID());
     junkSurvey.setName("Junk survey");
     junkSurvey.setSampleSeparator('j');
-    junkSurvey.setSampleDefinitionUrl("http://junk");
     surveyRepository.saveAndFlush(junkSurvey);
 
     CollectionExercise junkCollectionExercise = new CollectionExercise();
