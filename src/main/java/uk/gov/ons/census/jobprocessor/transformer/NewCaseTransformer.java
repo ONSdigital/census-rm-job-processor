@@ -1,6 +1,5 @@
 package uk.gov.ons.census.jobprocessor.transformer;
 
-import java.util.HashMap;
 import java.util.Map;
 import uk.gov.ons.census.common.model.entity.Job;
 import uk.gov.ons.census.common.model.entity.JobRow;
@@ -21,15 +20,6 @@ public class NewCaseTransformer implements Transformer {
     NewCase newCase = new NewCase();
     newCase.setCaseId(jobRow.getId()); // Use row ID so we get no dupes if support tool crashes
     newCase.setCollectionExerciseId(job.getCollectionExercise().getId());
-
-    Map<String, String> sampleData = new HashMap<>();
-
-    for (ColumnValidator columnValidator : columnValidators) {
-      String columnName = columnValidator.getColumnName();
-      String sampleValue = rowData.get(columnName);
-
-      sampleData.put(columnName, sampleValue);
-    }
 
     newCase.setUprn(rowData.get("UPRN"));
     newCase.setEstabUprn(rowData.get("ESTAB_UPRN"));
@@ -55,9 +45,11 @@ public class NewCaseTransformer implements Transformer {
     newCase.setTreatmentCode(rowData.get("TREATMENT_CODE"));
     newCase.setFieldCoordinatorId(rowData.get("FIELDCOORDINATOR_ID"));
     newCase.setFieldOfficerId(rowData.get("FIELDOFFICER_ID"));
-    newCase.setCeExpectedCapacity(Integer.valueOf(rowData.get("CE_EXPECTED_CAPACITY")));
     newCase.setSecureEstablishment(Boolean.parseBoolean(rowData.get("CE_SECURE")));
     newCase.setPrintBatch(rowData.get("PRINT_BATCH"));
+    if (!rowData.get("CE_EXPECTED_CAPACITY").isEmpty()) {
+      newCase.setCeExpectedCapacity(Integer.parseInt(rowData.get("CE_EXPECTED_CAPACITY")));
+    }
 
     PayloadDTO payloadDTO = new PayloadDTO();
     payloadDTO.setNewCase(newCase);
