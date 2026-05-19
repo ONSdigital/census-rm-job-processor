@@ -33,14 +33,13 @@ public class BulkRefusalTypeProcessor extends JobTypeProcessor {
   private ColumnValidator[] getBulkRefusalProcessorValidationRules(
       CollectionExercise collectionExercise) {
     Rule[] caseExistsRules = {new CaseExistsInCollectionExerciseRule(collectionExercise)};
-    ColumnValidator caseExistsValidator = new ColumnValidator("caseId", false, caseExistsRules);
+    ColumnValidator caseExistsValidator = new ColumnValidator("caseId", caseExistsRules);
 
     String[] refusalTypes =
         EnumSet.allOf(RefusalTypeDTO.class).stream().map(Enum::toString).toArray(String[]::new);
     Rule[] refusalSetRules = {new InSetRule(refusalTypes), new MandatoryRule()};
 
-    ColumnValidator refusalTypeValidator =
-        new ColumnValidator("refusalType", false, refusalSetRules);
+    ColumnValidator refusalTypeValidator = new ColumnValidator("refusalType", refusalSetRules);
 
     return new ColumnValidator[] {caseExistsValidator, refusalTypeValidator};
   }

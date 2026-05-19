@@ -1,6 +1,7 @@
 package uk.gov.ons.census.jobprocessor.schedule;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.ons.census.jobprocessor.testutils.JunkDataHelper.getJobRowData;
 
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
@@ -39,9 +40,6 @@ public class ValidatedJobProcessorIT {
   private static final String NEW_CASE_SUBSCRIPTION = "event_new-case_rm-case-processor";
   private static final String REFUSAL_SUBSCRIPTION = "event_refusal_rm-case-processor";
   private static final String INVALID_SUBSCRIPTION = "event_invalid-case_rm-case-processor";
-  private static final String UPDATE_SAMPLE_SUBSCRIPTION = "event_update-sample_rm-case-processor";
-  private static final String UPDATE_SAMPLE_SENSITIVE_SUBSCRIPTION =
-      "event_update-sample-sensitive_rm-case-processor";
 
   @Autowired private JobRepository jobRepository;
 
@@ -59,12 +57,6 @@ public class ValidatedJobProcessorIT {
 
   @Value("${queueconfig.invalid-case-event-topic}")
   private String invalidCaseEventTopic;
-
-  @Value("${queueconfig.update-sample-topic}")
-  private String updateSampleTopic;
-
-  @Value("${queueconfig.update-sample-sensitive-topic}")
-  private String updateSampleSensitiveTopic;
 
   @Test
   void processStagedJobsSample() throws InterruptedException {
@@ -89,7 +81,8 @@ public class ValidatedJobProcessorIT {
       jobRow.setId(UUID.randomUUID());
       jobRow.setJob(job);
       jobRow.setJobRowStatus(JobRowStatus.VALIDATED_OK);
-      jobRow.setRowData(Map.of("Junk", "test junk", "SensitiveJunk", "sensitive"));
+      Map<String, String> jobRowData = getJobRowData();
+      jobRow.setRowData(jobRowData);
       jobRow.setOriginalRowData(new String[] {"foo", "bar"});
       jobRowRepository.saveAndFlush(jobRow);
 
@@ -103,11 +96,8 @@ public class ValidatedJobProcessorIT {
       assertThat(emittedEvent.getPayload().getNewCase()).isNotNull();
       assertThat(emittedEvent.getPayload().getNewCase().getCollectionExerciseId())
           .isEqualTo(collectionExercise.getId());
-      assertThat(emittedEvent.getPayload().getNewCase().getSample().get("Junk"))
-          .isEqualTo("test junk");
-      assertThat(emittedEvent.getPayload().getNewCase().getSampleSensitive().get("SensitiveJunk"))
-          .isEqualTo("sensitive");
-
+      assertThat(emittedEvent.getPayload().getNewCase().getUprn())
+          .isEqualTo(jobRowData.get("UPRN"));
       Job processedJob = getProcessedJob(job.getId());
       assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.PROCESSED);
       assertThat(processedJob.getProcessingRowNumber()).isEqualTo(1);
@@ -204,120 +194,6 @@ public class ValidatedJobProcessorIT {
       assertThat(emittedEvent.getPayload().getInvalidCase()).isNotNull();
       assertThat(emittedEvent.getPayload().getInvalidCase().getCaseId()).isEqualTo(caze.getId());
       assertThat(emittedEvent.getPayload().getInvalidCase().getReason()).isEqualTo("why");
-
-      Job processedJob = getProcessedJob(job.getId());
-      assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.PROCESSED);
-      assertThat(processedJob.getProcessingRowNumber()).isEqualTo(1);
-
-      Optional<JobRow> optionalJobRow = jobRowRepository.findById(jobRow.getId());
-      assertThat(optionalJobRow.isPresent()).isFalse();
-    }
-  }
-
-  @Test
-  void processStagedJobsBulkUpdateSample() throws InterruptedException {
-    pubsubHelper.purgePubsubProjectMessages(UPDATE_SAMPLE_SUBSCRIPTION, updateSampleTopic);
-
-    try (QueueSpy<EventDTO> surveyUpdateQueue =
-        pubsubHelper.pubsubProjectListen(UPDATE_SAMPLE_SUBSCRIPTION, EventDTO.class)) {
-      Case caze = junkDataHelper.setupJunkCase();
-      CollectionExercise collectionExercise = caze.getCollectionExercise();
-
-      Job job = new Job();
-      job.setId(UUID.randomUUID());
-      job.setCollectionExercise(collectionExercise);
-      job.setJobStatus(JobStatus.VALIDATED_OK);
-      job.setJobType(JobType.BULK_UPDATE_SAMPLE);
-      job.setCreatedBy("norman");
-      job.setCreatedAt(OffsetDateTime.now());
-      job.setFileId(UUID.randomUUID());
-      job.setFileName("normansfile.csv");
-      job = jobRepository.saveAndFlush(job);
-
-      JobRow jobRow = new JobRow();
-      jobRow.setId(UUID.randomUUID());
-      jobRow.setJob(job);
-      jobRow.setJobRowStatus(JobRowStatus.VALIDATED_OK);
-      jobRow.setRowData(
-          Map.of(
-              "caseId", caze.getId().toString(), "fieldToUpdate", "Junk", "newValue", "updated"));
-      jobRow.setOriginalRowData(new String[] {"foo", "bar"});
-      jobRowRepository.saveAndFlush(jobRow);
-
-      // This will unleash the hounds
-      job.setJobStatus(JobStatus.PROCESSING_IN_PROGRESS);
-      jobRepository.saveAndFlush(job);
-
-      // Now check that the job processed OK
-      EventDTO emittedEvent = surveyUpdateQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      assertThat(emittedEvent).isNotNull();
-      assertThat(emittedEvent.getPayload().getUpdateSample()).isNotNull();
-      assertThat(emittedEvent.getPayload().getUpdateSample().getCaseId()).isEqualTo(caze.getId());
-      assertThat(emittedEvent.getPayload().getUpdateSample().getSample().get("Junk"))
-          .isEqualTo("updated");
-
-      Job processedJob = getProcessedJob(job.getId());
-      assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.PROCESSED);
-      assertThat(processedJob.getProcessingRowNumber()).isEqualTo(1);
-
-      Optional<JobRow> optionalJobRow = jobRowRepository.findById(jobRow.getId());
-      assertThat(optionalJobRow.isPresent()).isFalse();
-    }
-  }
-
-  @Test
-  void processStagedJobsBulkUpdateSampleSensitive() throws InterruptedException {
-    pubsubHelper.purgePubsubProjectMessages(
-        UPDATE_SAMPLE_SENSITIVE_SUBSCRIPTION, updateSampleSensitiveTopic);
-
-    try (QueueSpy<EventDTO> surveyUpdateQueue =
-        pubsubHelper.pubsubProjectListen(UPDATE_SAMPLE_SENSITIVE_SUBSCRIPTION, EventDTO.class)) {
-      Case caze = junkDataHelper.setupJunkCase();
-      CollectionExercise collectionExercise = caze.getCollectionExercise();
-
-      Job job = new Job();
-      job.setId(UUID.randomUUID());
-      job.setCollectionExercise(collectionExercise);
-      job.setJobStatus(JobStatus.VALIDATED_OK);
-      job.setJobType(JobType.BULK_UPDATE_SAMPLE_SENSITIVE);
-      job.setCreatedBy("norman");
-      job.setCreatedAt(OffsetDateTime.now());
-      job.setFileId(UUID.randomUUID());
-      job.setFileName("normansfile.csv");
-      job = jobRepository.saveAndFlush(job);
-
-      JobRow jobRow = new JobRow();
-      jobRow.setId(UUID.randomUUID());
-      jobRow.setJob(job);
-      jobRow.setJobRowStatus(JobRowStatus.VALIDATED_OK);
-      jobRow.setRowData(
-          Map.of(
-              "caseId",
-              caze.getId().toString(),
-              "fieldToUpdate",
-              "SensitiveJunk",
-              "newValue",
-              "updated"));
-      jobRow.setOriginalRowData(new String[] {"foo", "bar"});
-      jobRowRepository.saveAndFlush(jobRow);
-
-      // This will unleash the hounds
-      job.setJobStatus(JobStatus.PROCESSING_IN_PROGRESS);
-      jobRepository.saveAndFlush(job);
-
-      // Now check that the job processed OK
-      EventDTO emittedEvent = surveyUpdateQueue.getQueue().poll(20, TimeUnit.SECONDS);
-      assertThat(emittedEvent).isNotNull();
-      assertThat(emittedEvent.getPayload().getUpdateSampleSensitive()).isNotNull();
-      assertThat(emittedEvent.getPayload().getUpdateSampleSensitive().getCaseId())
-          .isEqualTo(caze.getId());
-      assertThat(
-              emittedEvent
-                  .getPayload()
-                  .getUpdateSampleSensitive()
-                  .getSampleSensitive()
-                  .get("SensitiveJunk"))
-          .isEqualTo("updated");
 
       Job processedJob = getProcessedJob(job.getId());
       assertThat(processedJob.getJobStatus()).isEqualTo(JobStatus.PROCESSED);
