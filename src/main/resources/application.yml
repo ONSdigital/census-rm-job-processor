@@ -45,6 +45,4 @@ queueconfig:
   new-case-topic: event_new-case
   refusal-event-topic: event_refusal
   invalid-case-event-topic: event_invalid-case
-  update-sample-topic: event_update-sample
-  update-sample-sensitive-topic: event_update-sample-sensitive
   publishtimeout: 30  # In seconds

@@ -6,8 +6,6 @@ import uk.gov.ons.census.common.model.entity.CollectionExercise;
 import uk.gov.ons.census.common.model.entity.JobType;
 import uk.gov.ons.census.jobprocessor.jobtype.processors.BulkInvalidTypeProcessor;
 import uk.gov.ons.census.jobprocessor.jobtype.processors.BulkRefusalTypeProcessor;
-import uk.gov.ons.census.jobprocessor.jobtype.processors.BulkUpdateSampleTypeProcessor;
-import uk.gov.ons.census.jobprocessor.jobtype.processors.BulkUpdateSensitiveSampleTypeProcessor;
 import uk.gov.ons.census.jobprocessor.jobtype.processors.JobTypeProcessor;
 import uk.gov.ons.census.jobprocessor.jobtype.processors.SampleLoadTypeProcessor;
 
@@ -27,12 +25,6 @@ public class JobTypeHelper {
   @Value("${queueconfig.invalid-case-event-topic}")
   private String invalidCaseTopic;
 
-  @Value("${queueconfig.update-sample-topic}")
-  private String updateSampleTopic;
-
-  @Value("${queueconfig.update-sample-sensitive-topic}")
-  private String updateSensitiveSampleTopic;
-
   public JobTypeProcessor getJobTypeProcessor(
       JobType jobType, CollectionExercise collectionExercise) {
 
@@ -42,21 +34,13 @@ public class JobTypeHelper {
 
     switch (jobType) {
       case SAMPLE:
-        return new SampleLoadTypeProcessor(newCaseTopic, pubsubProject, collectionExercise);
+        return new SampleLoadTypeProcessor(newCaseTopic, pubsubProject);
 
       case BULK_REFUSAL:
         return new BulkRefusalTypeProcessor(refusalEventTopic, pubsubProject, collectionExercise);
 
       case BULK_INVALID:
         return new BulkInvalidTypeProcessor(invalidCaseTopic, pubsubProject, collectionExercise);
-
-      case BULK_UPDATE_SAMPLE:
-        return new BulkUpdateSampleTypeProcessor(
-            updateSampleTopic, pubsubProject, collectionExercise);
-
-      case BULK_UPDATE_SAMPLE_SENSITIVE:
-        return new BulkUpdateSensitiveSampleTypeProcessor(
-            updateSensitiveSampleTopic, pubsubProject, collectionExercise);
 
       default:
         // This code should be unreachable, providing we have a case for every JobType

@@ -17,7 +17,7 @@ public class CaseExistsInCollectionExerciseRule implements Rule {
   }
 
   @Override
-  public Optional<String> checkValidity(String data) {
+  public Optional<String> checkStringValidity(String data) {
 
     UUID caseId;
     try {
