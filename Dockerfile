@@ -1,10 +1,12 @@
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 CMD ["java", "-jar", "/opt/census-rm-job-processor.jar"]
 
 COPY healthcheck.sh /opt/healthcheck.sh
-RUN addgroup --gid 1000 jobprocessor && \
-    adduser --system --uid 1000 jobprocessor jobprocessor
+# Create a system group and user without forcing UID/GID
+RUN addgroup --system jobprocessor && \
+    adduser --system --ingroup jobprocessor jobprocessor
+
 USER jobprocessor
 
 COPY target/census-rm-job-processor*.jar /opt/census-rm-job-processor.jar
