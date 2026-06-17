@@ -17,8 +17,26 @@
   <properties>
     <maven.compiler.release>21</maven.compiler.release>
     <java.version>21</java.version>
+    <container.cli>docker</container.cli>
   </properties>
 
+
+  <profiles>
+    <!-- Podman profile activated when env CONTAINER_CLI is set to "podman" -->
+    <!-- This is so podman will be used to run docker commands -->
+    <profile>
+      <id>podman</id>
+      <activation>
+        <property>
+          <name>env.CONTAINER_CLI</name>
+          <value>podman</value>
+        </property>
+      </activation>
+      <properties>
+        <container.cli>podman</container.cli>
+      </properties>
+    </profile>
+  </profiles>
 
   <dependencyManagement>
     <dependencies>
@@ -239,7 +257,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>docker</executable>
+              <executable>${container.cli}</executable>
               <commandlineArgs>compose -f src/test/resources/docker-compose.yml up -d</commandlineArgs>
             </configuration>
           </execution>
@@ -250,7 +268,7 @@
               <goal>exec</goal>
             </goals>
             <configuration>
-              <executable>docker</executable>
+              <executable>${container.cli}</executable>
               <commandlineArgs>compose -f src/test/resources/docker-compose.yml down -v</commandlineArgs>
             </configuration>
           </execution>
